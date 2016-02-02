@@ -14,6 +14,7 @@ func TestNew(t *testing.T) {
 		{6, nil},
 		{6.0, nil},
 		{6.6, nil},
+		{float32(6.6), nil},
 		{int64(922336854775807), nil},
 		{int64(9223372036854775807), nil},
 		{int64(9223372036854775807), nil},

@@ -34,7 +34,9 @@ func New(v interface{}) (*Literal, error) {
 	case int:
 		return &Literal{i: int64(e), canBeInt: yes}, nil
 	case int64:
-		return &Literal{i: int64(e), canBeInt: yes}, nil
+		return &Literal{i: e, canBeInt: yes}, nil
+	case float32:
+		return &Literal{f: float64(e), canBeFloat: yes}, nil
 	case float64:
 		return &Literal{f: e, canBeFloat: yes}, nil
 	case string:
