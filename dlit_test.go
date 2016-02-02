@@ -102,11 +102,11 @@ func TestBool(t *testing.T) {
 		wantIsBool bool
 	}{
 		{makeLit(1), true, true},
-		{makeLit(2), true, true},
+		{makeLit(2), false, false},
 		{makeLit(0), false, true},
 		{makeLit(1.0), true, true},
-		{makeLit(2.0), true, true},
-		{makeLit(2.25), true, true},
+		{makeLit(2.0), false, false},
+		{makeLit(2.25), false, false},
 		{makeLit(0.0), false, true},
 		{makeLit(true), true, true},
 		{makeLit(false), false, true},

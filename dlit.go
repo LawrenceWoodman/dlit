@@ -106,13 +106,25 @@ func (l *Literal) Bool() (bool, bool) {
 		return l.b, true
 	case unknown:
 		if l.canBeInt == yes {
-			l.canBeBool = yes
-			l.b = l.i != 0
-			return l.b, true
+			if l.i == 0 {
+				l.canBeBool = yes
+				l.b = false
+				return false, true
+			} else if l.i == 1 {
+				l.canBeBool = yes
+				l.b = true
+				return true, true
+			}
 		} else if l.canBeFloat == yes {
-			l.canBeBool = yes
-			l.b = l.f != 0.0
-			return l.b, true
+			if l.f == 0.0 {
+				l.canBeBool = yes
+				l.b = false
+				return false, true
+			} else if l.f == 1.0 {
+				l.canBeBool = yes
+				l.b = true
+				return true, true
+			}
 		} else {
 			b, err := strconv.ParseBool(l.s)
 			if err == nil {
