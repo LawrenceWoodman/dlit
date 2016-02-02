@@ -42,110 +42,95 @@ func TestInt(t *testing.T) {
 	cases := []struct {
 		in        *Literal
 		want      int64
-		wantError error
+		wantIsInt bool
 	}{
-		{makeLit(6), 6, nil},
-		{makeLit(6.0), 6, nil},
-		{makeLit("6"), 6, nil},
-		{makeLit("98292223372036854775807"), 0,
-			ErrInvalidCast{makeLit("98292223372036854775807"), "int"}},
-		{makeLit(6.6), 0, ErrInvalidCast{makeLit(6.6), "int"}},
-		{makeLit("6.6"), 0, ErrInvalidCast{makeLit("6.6"), "int"}},
-		{makeLit("abc"), 0, ErrInvalidCast{makeLit("abc"), "int"}},
-		{makeLit(true), 0, ErrInvalidCast{makeLit(true), "int"}},
-		{makeLit(false), 0, ErrInvalidCast{makeLit(false), "int"}},
-		{makeLit(errors.New("This is an error")), 0,
-			ErrInvalidCast{makeLit(errors.New("This is an error")), "int"}},
+		{makeLit(6), 6, true},
+		{makeLit(6.0), 6, true},
+		{makeLit(float32(6.0)), 6, true},
+		{makeLit("6"), 6, true},
+		{makeLit("6.0"), 6, true},
+		{makeLit("98292223372036854775807"), 0, false},
+		{makeLit(6.6), 0, false},
+		{makeLit("6.6"), 0, false},
+		{makeLit("abc"), 0, false},
+		{makeLit(true), 0, false},
+		{makeLit(false), 0, false},
+		{makeLit(errors.New("This is an error")), 0, false},
 	}
 
 	for _, c := range cases {
-		got, err := c.in.Int()
-		if !errorMatch(err, c.wantError) {
-			t.Errorf("Int() with Literal: %q - err == %q, wantError == %q",
-				c.in, err, c.wantError)
-		}
-		if got != c.want {
-			t.Errorf("Int() with Literal: %q - return: %q, want: %q",
-				c.in, got, c.want)
+		got, gotIsInt := c.in.Int()
+		if got != c.want || gotIsInt != c.wantIsInt {
+			t.Errorf("Int() with Literal: %q - return: %q, %q - want: %q, %q",
+				c.in, got, gotIsInt, c.want, c.wantIsInt)
 		}
 	}
 }
 
 func TestFloat(t *testing.T) {
 	cases := []struct {
-		in        *Literal
-		want      float64
-		wantError error
+		in          *Literal
+		want        float64
+		wantIsFloat bool
 	}{
-		{makeLit(6), 6.0, nil},
-		{makeLit(int64(922336854775807)), 922336854775807.0, nil},
-		{makeLit(int64(9223372036854775807)), 0.0,
-			ErrInvalidCast{makeLit(int64(9223372036854775807)), "float"}},
-		{makeLit(6.0), 6.0, nil},
-		{makeLit("6"), 6.0, nil},
-		{makeLit(6.678934), 6.678934, nil},
-		{makeLit("6.678394"), 6.678394, nil},
-		{makeLit("abc"), 0, ErrInvalidCast{makeLit("abc"), "float"}},
-		{makeLit(true), 0, ErrInvalidCast{makeLit(true), "float"}},
-		{makeLit(false), 0, ErrInvalidCast{makeLit(false), "float"}},
-		{makeLit(errors.New("This is an error")), 0,
-			ErrInvalidCast{makeLit(errors.New("This is an error")), "float"}},
+		{makeLit(6), 6.0, true},
+		{makeLit(int64(922336854775807)), 922336854775807.0, true},
+		{makeLit(int64(9223372036854775807)), 0.0, false},
+		{makeLit(6.0), 6.0, true},
+		{makeLit("6"), 6.0, true},
+		{makeLit(6.678934), 6.678934, true},
+		{makeLit("6.678394"), 6.678394, true},
+		{makeLit("abc"), 0, false},
+		{makeLit(true), 0, false},
+		{makeLit(false), 0, false},
+		{makeLit(errors.New("This is an error")), 0, false},
 	}
 
 	for _, c := range cases {
-		got, err := c.in.Float()
-		if !errorMatch(err, c.wantError) {
-			t.Errorf("Float() with Literal: %q - err == %q, wantError == %q",
-				c.in, err, c.wantError)
-		}
-		if got != c.want {
-			t.Errorf("Float() with Literal: %q - return: %q, want: %q",
-				c.in, got, c.want)
+		got, gotIsFloat := c.in.Float()
+		if got != c.want || gotIsFloat != c.wantIsFloat {
+			t.Errorf("Float() with Literal: %q - return: %q, %q - want: %q, %q",
+				c.in, got, gotIsFloat, c.want, c.wantIsFloat)
 		}
 	}
 }
 
 func TestBool(t *testing.T) {
 	cases := []struct {
-		in        *Literal
-		want      bool
-		wantError error
+		in         *Literal
+		want       bool
+		wantIsBool bool
 	}{
-		{makeLit(1), true, nil},
-		{makeLit(2), true, nil},
-		{makeLit(0), false, nil},
-		{makeLit(1.0), true, nil},
-		{makeLit(2.0), true, nil},
-		{makeLit(2.25), true, nil},
-		{makeLit(0.0), false, nil},
-		{makeLit(true), true, nil},
-		{makeLit(false), false, nil},
-		{makeLit("true"), true, nil},
-		{makeLit("false"), false, nil},
-		{makeLit("True"), true, nil},
-		{makeLit("False"), false, nil},
-		{makeLit("TRUE"), true, nil},
-		{makeLit("FALSE"), false, nil},
-		{makeLit("t"), true, nil},
-		{makeLit("f"), false, nil},
-		{makeLit("T"), true, nil},
-		{makeLit("F"), false, nil},
-		{makeLit("1"), true, nil},
-		{makeLit("0"), false, nil},
-		{makeLit("bob"), false, ErrInvalidCast{makeLit("bob"), "bool"}},
-		{makeLit(errors.New("This is an error")), false,
-			ErrInvalidCast{makeLit(errors.New("This is an error")), "bool"}},
+		{makeLit(1), true, true},
+		{makeLit(2), true, true},
+		{makeLit(0), false, true},
+		{makeLit(1.0), true, true},
+		{makeLit(2.0), true, true},
+		{makeLit(2.25), true, true},
+		{makeLit(0.0), false, true},
+		{makeLit(true), true, true},
+		{makeLit(false), false, true},
+		{makeLit("true"), true, true},
+		{makeLit("false"), false, true},
+		{makeLit("True"), true, true},
+		{makeLit("False"), false, true},
+		{makeLit("TRUE"), true, true},
+		{makeLit("FALSE"), false, true},
+		{makeLit("t"), true, true},
+		{makeLit("f"), false, true},
+		{makeLit("T"), true, true},
+		{makeLit("F"), false, true},
+		{makeLit("1"), true, true},
+		{makeLit("0"), false, true},
+		{makeLit("bob"), false, false},
+		{makeLit(errors.New("This is an error")), false, false},
 	}
 
 	for _, c := range cases {
-		got, err := c.in.Bool()
-		if !errorMatch(err, c.wantError) {
-			t.Errorf("Bool() with Literal: %q - err == %q, wantError == %q",
-				c.in, err, c.wantError)
-		}
-		if got != c.want {
-			t.Errorf("Bool() with Literal: %q - return: %q, want: %q",
-				c.in, got, c.want)
+		got, gotIsBool := c.in.Bool()
+		if got != c.want || gotIsBool != c.wantIsBool {
+			t.Errorf("Bool() with Literal: %q - return: %q, %q - want: %q, %q",
+				c.in, got, gotIsBool, c.want, c.wantIsBool)
 		}
 	}
 }
