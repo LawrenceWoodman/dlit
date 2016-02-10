@@ -44,10 +44,10 @@ func New(v interface{}) (*Literal, error) {
 	case bool:
 		return &Literal{b: e, canBeBool: yes}, nil
 	case error:
-		return &Literal{e: e, canBeInt: no, canBeFloat: no, canBeBool: no,
-			canBeError: yes}, nil
+		return newErrorLiteral(e), nil
 	}
-	return nil, ErrInvalidKind(reflect.TypeOf(v).String())
+	err := ErrInvalidKind(reflect.TypeOf(v).String())
+	return newErrorLiteral(err), err
 }
 
 func (l *Literal) Int() (int64, bool) {
@@ -167,4 +167,9 @@ type ErrInvalidKind string
 
 func (e ErrInvalidKind) Error() string {
 	return fmt.Sprintf("Can't create Literal from type: %s", string(e))
+}
+
+func newErrorLiteral(e error) *Literal {
+	return &Literal{e: e, canBeInt: no, canBeFloat: no, canBeBool: no,
+		canBeError: yes}
 }

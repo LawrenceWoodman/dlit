@@ -9,31 +9,37 @@ import (
 func TestNew(t *testing.T) {
 	cases := []struct {
 		in        interface{}
+		want      *Literal
 		wantError error
 	}{
-		{6, nil},
-		{6.0, nil},
-		{6.6, nil},
-		{float32(6.6), nil},
-		{int64(922336854775807), nil},
-		{int64(9223372036854775807), nil},
-		{int64(9223372036854775807), nil},
-		{"98292223372036854775807", nil},
-		{complex64(1), ErrInvalidKind("complex64")},
-		{complex128(1), ErrInvalidKind("complex128")},
-		{"6", nil},
-		{"6.6", nil},
-		{"abc", nil},
-		{true, nil},
-		{false, nil},
-		{errors.New("This is an error"), nil},
+		{6, makeLit(6), nil},
+		{6.0, makeLit(6.0), nil},
+		{6.6, makeLit(6.6), nil},
+		{float32(6.6), makeLit(float32(6.6)), nil},
+		{int64(922336854775807), makeLit(922336854775807), nil},
+		{int64(9223372036854775807), makeLit(9223372036854775807), nil},
+		{"98292223372036854775807", makeLit("98292223372036854775807"), nil},
+		{complex64(1), makeLit(ErrInvalidKind("complex64")),
+			ErrInvalidKind("complex64")},
+		{complex128(1), makeLit(ErrInvalidKind("complex128")),
+			ErrInvalidKind("complex128")},
+		{"6", makeLit("6"), nil},
+		{"6.6", makeLit("6.6"), nil},
+		{"abc", makeLit("abc"), nil},
+		{true, makeLit(true), nil},
+		{false, makeLit(false), nil},
+		{errors.New("This is an error"), makeLit(errors.New("This is an error")),
+			nil},
 	}
 
 	for _, c := range cases {
-		_, err := New(c.in)
+		got, err := New(c.in)
 		if !errorMatch(err, c.wantError) {
-			t.Errorf("New(%q) - err == %q, wantError == %q",
-				c.in, err, c.wantError)
+			t.Errorf("New(%q) - err == %q, wantError == %q", c.in, err, c.wantError)
+		}
+
+		if got.String() != c.want.String() {
+			t.Errorf("New(%q) - got == %s, want == %s", c.in, got, c.want)
 		}
 	}
 }
