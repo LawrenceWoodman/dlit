@@ -3,6 +3,7 @@ package dlit
 import (
 	"errors"
 	"fmt"
+	"math"
 	"testing"
 )
 
@@ -55,7 +56,10 @@ func TestInt(t *testing.T) {
 		{makeLit(float32(6.0)), 6, true},
 		{makeLit("6"), 6, true},
 		{makeLit("6.0"), 6, true},
-		{makeLit("98292223372036854775807"), 0, false},
+		{makeLit(fmt.Sprintf("%d", math.MinInt64)), math.MinInt64, true},
+		{makeLit(fmt.Sprintf("%d", math.MaxInt64)), math.MaxInt64, true},
+		{makeLit("-9223372036854775809"), 0, false},
+		{makeLit("9223372036854775808"), 0, false},
 		{makeLit(6.6), 0, false},
 		{makeLit("6.6"), 0, false},
 		{makeLit("abc"), 0, false},
@@ -81,7 +85,9 @@ func TestFloat(t *testing.T) {
 	}{
 		{makeLit(6), 6.0, true},
 		{makeLit(int64(922336854775807)), 922336854775807.0, true},
-		{makeLit(int64(9223372036854775807)), 0.0, false},
+		{makeLit(fmt.Sprintf("%G", math.SmallestNonzeroFloat64)),
+			math.SmallestNonzeroFloat64, true},
+		{makeLit(fmt.Sprintf("%f", math.MaxFloat64)), math.MaxFloat64, true},
 		{makeLit(6.0), 6.0, true},
 		{makeLit("6"), 6.0, true},
 		{makeLit(6.678934), 6.678934, true},

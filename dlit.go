@@ -6,6 +6,7 @@ package dlit
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 )
 
@@ -55,21 +56,12 @@ func (l *Literal) Int() (int64, bool) {
 	case yes:
 		return l.i, true
 	case unknown:
-		f, isFloat := l.Float()
-		if isFloat {
-			possibleInt := int64(f)
-			if f == float64(possibleInt) {
-				l.canBeInt = yes
-				l.i = possibleInt
-				return possibleInt, true
-			}
-		} else {
-			i, err := strconv.ParseInt(l.String(), 10, 64)
-			if err == nil {
-				l.canBeInt = yes
-				l.i = i
-				return i, true
-			}
+		str := trailingZerosRegexp.ReplaceAllString(l.String(), "")
+		i, err := strconv.ParseInt(str, 10, 64)
+		if err == nil {
+			l.canBeInt = yes
+			l.i = i
+			return i, true
 		}
 	}
 	l.canBeInt = no
@@ -81,19 +73,11 @@ func (l *Literal) Float() (float64, bool) {
 	case yes:
 		return l.f, true
 	case unknown:
-		if l.canBeInt == yes {
-			possibleFloat := float64(l.i)
-			if l.i == int64(possibleFloat) {
-				l.canBeFloat = yes
-				return possibleFloat, true
-			}
-		} else {
-			f, err := strconv.ParseFloat(l.String(), 64)
-			if err == nil {
-				l.canBeFloat = yes
-				l.f = f
-				return f, true
-			}
+		f, err := strconv.ParseFloat(l.String(), 64)
+		if err == nil {
+			l.canBeFloat = yes
+			l.f = f
+			return f, true
 		}
 	}
 	l.canBeFloat = no
@@ -173,3 +157,5 @@ func newErrorLiteral(e error) *Literal {
 	return &Literal{e: e, canBeInt: no, canBeFloat: no, canBeBool: no,
 		canBeError: yes}
 }
+
+var trailingZerosRegexp = regexp.MustCompile("\\.0*$")
