@@ -1,6 +1,11 @@
 /*
+ * A package for easing the use of dynamic literals
+ *
  * Copyright (C) 2016 Lawrence Woodman <lwoodman@vlifesystems.com>
+ *
+ * Licensed under an MIT licence.  Please see LICENCE.md for details.
  */
+
 package dlit
 
 import (
