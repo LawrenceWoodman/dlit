@@ -56,6 +56,14 @@ func New(v interface{}) (*Literal, error) {
 	return newErrorLiteral(err), err
 }
 
+func MustNew(v interface{}) *Literal {
+	l, err := New(v)
+	if err != nil {
+		panic(err.Error())
+	}
+	return l
+}
+
 func (l *Literal) Int() (int64, bool) {
 	switch l.canBeInt {
 	case yes:

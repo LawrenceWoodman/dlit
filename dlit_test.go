@@ -45,6 +45,62 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestMustNew(t *testing.T) {
+	cases := []struct {
+		in   interface{}
+		want *Literal
+	}{
+		{6, makeLit(6)},
+		{6.0, makeLit(6.0)},
+		{6.6, makeLit(6.6)},
+		{float32(6.6), makeLit(float32(6.6))},
+		{int64(922336854775807), makeLit(922336854775807)},
+		{int64(9223372036854775807), makeLit(9223372036854775807)},
+		{"98292223372036854775807", makeLit("98292223372036854775807")},
+		{"6", makeLit("6")},
+		{"6.6", makeLit("6.6")},
+		{"abc", makeLit("abc")},
+		{true, makeLit(true)},
+		{false, makeLit(false)},
+		{errors.New("This is an error"), makeLit(errors.New("This is an error"))},
+	}
+
+	for _, c := range cases {
+		got := MustNew(c.in)
+		if got.String() != c.want.String() {
+			t.Errorf("MustNew(%q) - got: %s, want: %s", c.in, got, c.want)
+		}
+	}
+}
+
+func TestMustNew_panic(t *testing.T) {
+	cases := []struct {
+		in        interface{}
+		wantPanic string
+	}{
+		{6, ""},
+		{complex64(1), ErrInvalidKind("complex64").Error()},
+	}
+
+	for _, c := range cases {
+		paniced := false
+		defer func() {
+			if r := recover(); r != nil {
+				if r.(string) == c.wantPanic {
+					paniced = true
+				} else {
+					t.Errorf("MustNew(%q) - got panic: %s, wanted: %s",
+						c.in, r, c.wantPanic)
+				}
+			}
+		}()
+		MustNew(c.in)
+		if c.wantPanic != "" && !paniced {
+			t.Errorf("MustNew(%q) - failed to panic with: %s", c.in, c.wantPanic)
+		}
+	}
+}
+
 func TestInt(t *testing.T) {
 	cases := []struct {
 		in        *Literal
