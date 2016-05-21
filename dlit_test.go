@@ -13,23 +13,23 @@ func TestNew(t *testing.T) {
 		want      *Literal
 		wantError error
 	}{
-		{6, makeLit(6), nil},
-		{6.0, makeLit(6.0), nil},
-		{6.6, makeLit(6.6), nil},
-		{float32(6.6), makeLit(float32(6.6)), nil},
-		{int64(922336854775807), makeLit(922336854775807), nil},
-		{int64(9223372036854775807), makeLit(9223372036854775807), nil},
-		{"98292223372036854775807", makeLit("98292223372036854775807"), nil},
-		{complex64(1), makeLit(ErrInvalidKind("complex64")),
+		{6, MustNew(6), nil},
+		{6.0, MustNew(6.0), nil},
+		{6.6, MustNew(6.6), nil},
+		{float32(6.6), MustNew(float32(6.6)), nil},
+		{int64(922336854775807), MustNew(922336854775807), nil},
+		{int64(9223372036854775807), MustNew(9223372036854775807), nil},
+		{"98292223372036854775807", MustNew("98292223372036854775807"), nil},
+		{complex64(1), MustNew(ErrInvalidKind("complex64")),
 			ErrInvalidKind("complex64")},
-		{complex128(1), makeLit(ErrInvalidKind("complex128")),
+		{complex128(1), MustNew(ErrInvalidKind("complex128")),
 			ErrInvalidKind("complex128")},
-		{"6", makeLit("6"), nil},
-		{"6.6", makeLit("6.6"), nil},
-		{"abc", makeLit("abc"), nil},
-		{true, makeLit(true), nil},
-		{false, makeLit(false), nil},
-		{errors.New("This is an error"), makeLit(errors.New("This is an error")),
+		{"6", MustNew("6"), nil},
+		{"6.6", MustNew("6.6"), nil},
+		{"abc", MustNew("abc"), nil},
+		{true, MustNew(true), nil},
+		{false, MustNew(false), nil},
+		{errors.New("This is an error"), MustNew(errors.New("This is an error")),
 			nil},
 	}
 
@@ -50,19 +50,19 @@ func TestMustNew(t *testing.T) {
 		in   interface{}
 		want *Literal
 	}{
-		{6, makeLit(6)},
-		{6.0, makeLit(6.0)},
-		{6.6, makeLit(6.6)},
-		{float32(6.6), makeLit(float32(6.6))},
-		{int64(922336854775807), makeLit(922336854775807)},
-		{int64(9223372036854775807), makeLit(9223372036854775807)},
-		{"98292223372036854775807", makeLit("98292223372036854775807")},
-		{"6", makeLit("6")},
-		{"6.6", makeLit("6.6")},
-		{"abc", makeLit("abc")},
-		{true, makeLit(true)},
-		{false, makeLit(false)},
-		{errors.New("This is an error"), makeLit(errors.New("This is an error"))},
+		{6, MustNew(6)},
+		{6.0, MustNew(6.0)},
+		{6.6, MustNew(6.6)},
+		{float32(6.6), MustNew(float32(6.6))},
+		{int64(922336854775807), MustNew(922336854775807)},
+		{int64(9223372036854775807), MustNew(9223372036854775807)},
+		{"98292223372036854775807", MustNew("98292223372036854775807")},
+		{"6", MustNew("6")},
+		{"6.6", MustNew("6.6")},
+		{"abc", MustNew("abc")},
+		{true, MustNew(true)},
+		{false, MustNew(false)},
+		{errors.New("This is an error"), MustNew(errors.New("This is an error"))},
 	}
 
 	for _, c := range cases {
@@ -107,25 +107,25 @@ func TestInt(t *testing.T) {
 		want      int64
 		wantIsInt bool
 	}{
-		{makeLit(6), 6, true},
-		{makeLit(6.0), 6, true},
-		{makeLit(float32(6.0)), 6, true},
-		{makeLit("6"), 6, true},
-		{makeLit("6.0"), 6, true},
-		{makeLit(fmt.Sprintf("%d", int64(math.MinInt64))),
+		{MustNew(6), 6, true},
+		{MustNew(6.0), 6, true},
+		{MustNew(float32(6.0)), 6, true},
+		{MustNew("6"), 6, true},
+		{MustNew("6.0"), 6, true},
+		{MustNew(fmt.Sprintf("%d", int64(math.MinInt64))),
 			int64(math.MinInt64), true},
-		{makeLit(fmt.Sprintf("%d", int64(math.MaxInt64))),
+		{MustNew(fmt.Sprintf("%d", int64(math.MaxInt64))),
 			int64(math.MaxInt64), true},
-		{makeLit(fmt.Sprintf("-1%d", int64(math.MinInt64))), 0, false},
-		{makeLit(fmt.Sprintf("1%d", int64(math.MaxInt64))), 0, false},
-		{makeLit("-9223372036854775809"), 0, false},
-		{makeLit("9223372036854775808"), 0, false},
-		{makeLit(6.6), 0, false},
-		{makeLit("6.6"), 0, false},
-		{makeLit("abc"), 0, false},
-		{makeLit(true), 0, false},
-		{makeLit(false), 0, false},
-		{makeLit(errors.New("This is an error")), 0, false},
+		{MustNew(fmt.Sprintf("-1%d", int64(math.MinInt64))), 0, false},
+		{MustNew(fmt.Sprintf("1%d", int64(math.MaxInt64))), 0, false},
+		{MustNew("-9223372036854775809"), 0, false},
+		{MustNew("9223372036854775808"), 0, false},
+		{MustNew(6.6), 0, false},
+		{MustNew("6.6"), 0, false},
+		{MustNew("abc"), 0, false},
+		{MustNew(true), 0, false},
+		{MustNew(false), 0, false},
+		{MustNew(errors.New("This is an error")), 0, false},
 	}
 
 	for _, c := range cases {
@@ -143,20 +143,20 @@ func TestFloat(t *testing.T) {
 		want        float64
 		wantIsFloat bool
 	}{
-		{makeLit(6), 6.0, true},
-		{makeLit(int64(922336854775807)), 922336854775807.0, true},
-		{makeLit(fmt.Sprintf("%G", float64(math.SmallestNonzeroFloat64))),
+		{MustNew(6), 6.0, true},
+		{MustNew(int64(922336854775807)), 922336854775807.0, true},
+		{MustNew(fmt.Sprintf("%G", float64(math.SmallestNonzeroFloat64))),
 			math.SmallestNonzeroFloat64, true},
-		{makeLit(fmt.Sprintf("%f", float64(math.MaxFloat64))),
+		{MustNew(fmt.Sprintf("%f", float64(math.MaxFloat64))),
 			float64(math.MaxFloat64), true},
-		{makeLit(6.0), 6.0, true},
-		{makeLit("6"), 6.0, true},
-		{makeLit(6.678934), 6.678934, true},
-		{makeLit("6.678394"), 6.678394, true},
-		{makeLit("abc"), 0, false},
-		{makeLit(true), 0, false},
-		{makeLit(false), 0, false},
-		{makeLit(errors.New("This is an error")), 0, false},
+		{MustNew(6.0), 6.0, true},
+		{MustNew("6"), 6.0, true},
+		{MustNew(6.678934), 6.678934, true},
+		{MustNew("6.678394"), 6.678394, true},
+		{MustNew("abc"), 0, false},
+		{MustNew(true), 0, false},
+		{MustNew(false), 0, false},
+		{MustNew(errors.New("This is an error")), 0, false},
 	}
 
 	for _, c := range cases {
@@ -174,29 +174,29 @@ func TestBool(t *testing.T) {
 		want       bool
 		wantIsBool bool
 	}{
-		{makeLit(1), true, true},
-		{makeLit(2), false, false},
-		{makeLit(0), false, true},
-		{makeLit(1.0), true, true},
-		{makeLit(2.0), false, false},
-		{makeLit(2.25), false, false},
-		{makeLit(0.0), false, true},
-		{makeLit(true), true, true},
-		{makeLit(false), false, true},
-		{makeLit("true"), true, true},
-		{makeLit("false"), false, true},
-		{makeLit("True"), true, true},
-		{makeLit("False"), false, true},
-		{makeLit("TRUE"), true, true},
-		{makeLit("FALSE"), false, true},
-		{makeLit("t"), true, true},
-		{makeLit("f"), false, true},
-		{makeLit("T"), true, true},
-		{makeLit("F"), false, true},
-		{makeLit("1"), true, true},
-		{makeLit("0"), false, true},
-		{makeLit("bob"), false, false},
-		{makeLit(errors.New("This is an error")), false, false},
+		{MustNew(1), true, true},
+		{MustNew(2), false, false},
+		{MustNew(0), false, true},
+		{MustNew(1.0), true, true},
+		{MustNew(2.0), false, false},
+		{MustNew(2.25), false, false},
+		{MustNew(0.0), false, true},
+		{MustNew(true), true, true},
+		{MustNew(false), false, true},
+		{MustNew("true"), true, true},
+		{MustNew("false"), false, true},
+		{MustNew("True"), true, true},
+		{MustNew("False"), false, true},
+		{MustNew("TRUE"), true, true},
+		{MustNew("FALSE"), false, true},
+		{MustNew("t"), true, true},
+		{MustNew("f"), false, true},
+		{MustNew("T"), true, true},
+		{MustNew("F"), false, true},
+		{MustNew("1"), true, true},
+		{MustNew("0"), false, true},
+		{MustNew("bob"), false, false},
+		{MustNew(errors.New("This is an error")), false, false},
 	}
 
 	for _, c := range cases {
@@ -213,16 +213,16 @@ func TestString(t *testing.T) {
 		in   *Literal
 		want string
 	}{
-		{makeLit(124), "124"},
-		{makeLit(int64(922336854775807)), "922336854775807"},
-		{makeLit(int64(9223372036854775807)), "9223372036854775807"},
-		{makeLit("98292223372036854775807"), "98292223372036854775807"},
-		{makeLit("Hello my name is fred"), "Hello my name is fred"},
-		{makeLit(124.0), "124"},
-		{makeLit(124.56728482274629), "124.56728482274629"},
-		{makeLit(true), "true"},
-		{makeLit(false), "false"},
-		{makeLit(errors.New("This is an error")), "This is an error"},
+		{MustNew(124), "124"},
+		{MustNew(int64(922336854775807)), "922336854775807"},
+		{MustNew(int64(9223372036854775807)), "9223372036854775807"},
+		{MustNew("98292223372036854775807"), "98292223372036854775807"},
+		{MustNew("Hello my name is fred"), "Hello my name is fred"},
+		{MustNew(124.0), "124"},
+		{MustNew(124.56728482274629), "124.56728482274629"},
+		{MustNew(true), "true"},
+		{MustNew(false), "false"},
+		{MustNew(errors.New("This is an error")), "This is an error"},
 	}
 
 	for _, c := range cases {
@@ -240,12 +240,12 @@ func TestErr(t *testing.T) {
 		want      error
 		wantIsErr bool
 	}{
-		{makeLit(1), nil, false},
-		{makeLit(2), nil, false},
-		{makeLit("true"), nil, false},
-		{makeLit(2.25), nil, false},
-		{makeLit("hello"), nil, false},
-		{makeLit(errors.New("This is an error")),
+		{MustNew(1), nil, false},
+		{MustNew(2), nil, false},
+		{MustNew("true"), nil, false},
+		{MustNew(2.25), nil, false},
+		{MustNew("hello"), nil, false},
+		{MustNew(errors.New("This is an error")),
 			errors.New("This is an error"), true},
 	}
 
@@ -261,14 +261,6 @@ func TestErr(t *testing.T) {
 /***********************
    Helper functions
 ************************/
-func makeLit(v interface{}) *Literal {
-	l, err := New(v)
-	if err != nil {
-		panic(fmt.Sprintf("MakeLit(%q) gave err: %q", v, err))
-	}
-	return l
-}
-
 func errorMatch(e1 error, e2 error) bool {
 	if e1 == nil && e2 == nil {
 		return true
