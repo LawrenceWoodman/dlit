@@ -234,6 +234,30 @@ func TestString(t *testing.T) {
 	}
 }
 
+func TestErr(t *testing.T) {
+	cases := []struct {
+		in        *Literal
+		want      error
+		wantIsErr bool
+	}{
+		{makeLit(1), nil, false},
+		{makeLit(2), nil, false},
+		{makeLit("true"), nil, false},
+		{makeLit(2.25), nil, false},
+		{makeLit("hello"), nil, false},
+		{makeLit(errors.New("This is an error")),
+			errors.New("This is an error"), true},
+	}
+
+	for _, c := range cases {
+		got, gotIsErr := c.in.Err()
+		if !errorMatch(c.want, got) || gotIsErr != c.wantIsErr {
+			t.Errorf("Err() with Literal: %q - return: %q, %q - want: %q, %q",
+				c.in, got, gotIsErr, c.want, c.wantIsErr)
+		}
+	}
+}
+
 /***********************
    Helper functions
 ************************/
