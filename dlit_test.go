@@ -45,6 +45,25 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestNewString(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *Literal
+	}{
+		{"", MustNew("")},
+		{"6", MustNew("6")},
+		{"6.27", MustNew("6.27")},
+		{"Hello how are you today", MustNew("Hello how are you today")},
+	}
+
+	for _, c := range cases {
+		got := NewString(c.in)
+		if got.String() != c.want.String() {
+			t.Errorf("New(%q) - got == %s, want == %s", c.in, got, c.want)
+		}
+	}
+}
+
 func TestMustNew(t *testing.T) {
 	cases := []struct {
 		in   interface{}
