@@ -150,7 +150,7 @@ func TestInt(t *testing.T) {
 	for _, c := range cases {
 		got, gotIsInt := c.in.Int()
 		if got != c.want || gotIsInt != c.wantIsInt {
-			t.Errorf("Int() with Literal: %q - return: %q, %q - want: %q, %q",
+			t.Errorf("Int() with Literal: %s - return: %d, %T - want: %d, %T",
 				c.in, got, gotIsInt, c.want, c.wantIsInt)
 		}
 	}
@@ -181,7 +181,7 @@ func TestFloat(t *testing.T) {
 	for _, c := range cases {
 		got, gotIsFloat := c.in.Float()
 		if got != c.want || gotIsFloat != c.wantIsFloat {
-			t.Errorf("Float() with Literal: %q - return: %q, %q - want: %q, %q",
+			t.Errorf("Float() with Literal: %s - return: %f, %T - want: %f, %T",
 				c.in, got, gotIsFloat, c.want, c.wantIsFloat)
 		}
 	}
@@ -221,7 +221,7 @@ func TestBool(t *testing.T) {
 	for _, c := range cases {
 		got, gotIsBool := c.in.Bool()
 		if got != c.want || gotIsBool != c.wantIsBool {
-			t.Errorf("Bool() with Literal: %q - return: %q, %q - want: %q, %q",
+			t.Errorf("Bool() with Literal: %s - return: %T, %T - want: %T, %T",
 				c.in, got, gotIsBool, c.want, c.wantIsBool)
 		}
 	}
