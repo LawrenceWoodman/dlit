@@ -255,24 +255,21 @@ func TestString(t *testing.T) {
 
 func TestErr(t *testing.T) {
 	cases := []struct {
-		in        *Literal
-		want      error
-		wantIsErr bool
+		in   *Literal
+		want error
 	}{
-		{MustNew(1), nil, false},
-		{MustNew(2), nil, false},
-		{MustNew("true"), nil, false},
-		{MustNew(2.25), nil, false},
-		{MustNew("hello"), nil, false},
-		{MustNew(errors.New("This is an error")),
-			errors.New("This is an error"), true},
+		{MustNew(1), nil},
+		{MustNew(2), nil},
+		{MustNew("true"), nil},
+		{MustNew(2.25), nil},
+		{MustNew("hello"), nil},
+		{MustNew(errors.New("This is an error")), errors.New("This is an error")},
 	}
 
 	for _, c := range cases {
-		got, gotIsErr := c.in.Err()
-		if !errorMatch(c.want, got) || gotIsErr != c.wantIsErr {
-			t.Errorf("Err() with Literal: %q - return: %q, %q - want: %q, %q",
-				c.in, got, gotIsErr, c.want, c.wantIsErr)
+		got := c.in.Err()
+		if !errorMatch(c.want, got) {
+			t.Errorf("Err() with Literal: %s - got: %s, want: %s", c.in, got, c.want)
 		}
 	}
 }

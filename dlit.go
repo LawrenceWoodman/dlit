@@ -160,11 +160,12 @@ func (l *Literal) String() string {
 	return l.s
 }
 
-func (l *Literal) Err() (error, bool) {
+// Returns an error if can be an error or nil
+func (l *Literal) Err() error {
 	if l.canBeError == yes {
-		return l.e, true
+		return l.e
 	}
-	return nil, false
+	return nil
 }
 
 type ErrInvalidKind string
