@@ -178,7 +178,7 @@ func (l *Literal) Err() error {
 	return nil
 }
 
-// ErrorInvalidKind indicates that a Literal can't be created from this type
+// ErrInvalidKind indicates that a Literal can't be created from this type
 type ErrInvalidKind string
 
 // Error returns the error as a string
