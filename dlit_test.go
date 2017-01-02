@@ -36,11 +36,11 @@ func TestNew(t *testing.T) {
 	for _, c := range cases {
 		got, err := New(c.in)
 		if !errorMatch(err, c.wantError) {
-			t.Errorf("New(%q) - err == %q, wantError == %q", c.in, err, c.wantError)
+			t.Errorf("New(%v) - err == %v, wantError == %v", c.in, err, c.wantError)
 		}
 
 		if got.String() != c.want.String() {
-			t.Errorf("New(%q) - got == %s, want == %s", c.in, got, c.want)
+			t.Errorf("New(%v) - got == %s, want == %s", c.in, got, c.want)
 		}
 	}
 }
@@ -59,7 +59,7 @@ func TestNewString(t *testing.T) {
 	for _, c := range cases {
 		got := NewString(c.in)
 		if got.String() != c.want.String() {
-			t.Errorf("New(%q) - got == %s, want == %s", c.in, got, c.want)
+			t.Errorf("New(%v) - got == %s, want == %s", c.in, got, c.want)
 		}
 	}
 }
@@ -87,7 +87,7 @@ func TestMustNew(t *testing.T) {
 	for _, c := range cases {
 		got := MustNew(c.in)
 		if got.String() != c.want.String() {
-			t.Errorf("MustNew(%q) - got: %s, want: %s", c.in, got, c.want)
+			t.Errorf("MustNew(%v) - got: %s, want: %s", c.in, got, c.want)
 		}
 	}
 }
@@ -108,14 +108,14 @@ func TestMustNew_panic(t *testing.T) {
 				if r.(string) == c.wantPanic {
 					paniced = true
 				} else {
-					t.Errorf("MustNew(%q) - got panic: %s, wanted: %s",
+					t.Errorf("MustNew(%v) - got panic: %s, wanted: %s",
 						c.in, r, c.wantPanic)
 				}
 			}
 		}()
 		MustNew(c.in)
 		if c.wantPanic != "" && !paniced {
-			t.Errorf("MustNew(%q) - failed to panic with: %s", c.in, c.wantPanic)
+			t.Errorf("MustNew(%v) - failed to panic with: %s", c.in, c.wantPanic)
 		}
 	}
 }
@@ -247,7 +247,7 @@ func TestString(t *testing.T) {
 	for _, c := range cases {
 		got := c.in.String()
 		if got != c.want {
-			t.Errorf("String() with Literal: %q - return: %q, want: %q",
+			t.Errorf("String() with Literal: %v - return: %v, want: %v",
 				c.in, got, c.want)
 		}
 	}
