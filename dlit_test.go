@@ -20,10 +20,10 @@ func TestNew(t *testing.T) {
 		{int64(922336854775807), MustNew(922336854775807), nil},
 		{int64(9223372036854775807), MustNew(9223372036854775807), nil},
 		{"98292223372036854775807", MustNew("98292223372036854775807"), nil},
-		{complex64(1), MustNew(ErrInvalidKind("complex64")),
-			ErrInvalidKind("complex64")},
-		{complex128(1), MustNew(ErrInvalidKind("complex128")),
-			ErrInvalidKind("complex128")},
+		{complex64(1), MustNew(InvalidKindError("complex64")),
+			InvalidKindError("complex64")},
+		{complex128(1), MustNew(InvalidKindError("complex128")),
+			InvalidKindError("complex128")},
 		{"6", MustNew("6"), nil},
 		{"6.6", MustNew("6.6"), nil},
 		{"abc", MustNew("abc"), nil},
@@ -98,7 +98,7 @@ func TestMustNew_panic(t *testing.T) {
 		wantPanic string
 	}{
 		{6, ""},
-		{complex64(1), ErrInvalidKind("complex64").Error()},
+		{complex64(1), InvalidKindError("complex64").Error()},
 	}
 
 	for _, c := range cases {
