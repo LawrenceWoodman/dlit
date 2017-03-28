@@ -131,6 +131,11 @@ func TestInt(t *testing.T) {
 		{MustNew(float32(6.0)), 6, true},
 		{MustNew("6"), 6, true},
 		{MustNew("6.0"), 6, true},
+		{MustNew("6."), 6, true},
+		{MustNew("6.0000"), 6, true},
+		{MustNew("-6"), -6, true},
+		{MustNew("-6.0"), -6, true},
+		{MustNew("-6."), -6, true},
 		{MustNew(fmt.Sprintf("%d", int64(math.MinInt64))),
 			int64(math.MinInt64), true},
 		{MustNew(fmt.Sprintf("%d", int64(math.MaxInt64))),
@@ -141,9 +146,12 @@ func TestInt(t *testing.T) {
 		{MustNew("9223372036854775808"), 0, false},
 		{MustNew(6.6), 0, false},
 		{MustNew("6.6"), 0, false},
+		{MustNew("6.06"), 0, false},
 		{MustNew("abc"), 0, false},
 		{MustNew(true), 0, false},
 		{MustNew(false), 0, false},
+		{MustNew(".0"), 0, false},
+		{MustNew(".23"), 0, false},
 		{MustNew(errors.New("This is an error")), 0, false},
 	}
 
@@ -271,6 +279,27 @@ func TestErr(t *testing.T) {
 		if !errorMatch(c.want, got) {
 			t.Errorf("Err() with Literal: %s - got: %s, want: %s", c.in, got, c.want)
 		}
+	}
+}
+
+/*************************
+       Benchmarks
+*************************/
+func BenchmarkInt_unknown(b *testing.B) {
+	b.StopTimer()
+	var sum int64
+	for n := 0; n < b.N; n++ {
+		l := MustNew("7.0")
+		b.StartTimer()
+		v, ok := l.Int()
+		b.StopTimer()
+		if !ok {
+			b.Errorf("Int - ok: %t, want: %t", ok, true)
+		}
+		sum += v
+	}
+	if sum != int64(7*b.N) {
+		b.Errorf("sum: %d, want: %d", sum, 7*b.N)
 	}
 }
 
