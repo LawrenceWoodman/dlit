@@ -8,29 +8,48 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	anError := errors.New("this is an error")
+	cases := []struct {
+		in   interface{}
+		want *Literal
+	}{
+		{6, MustNew(6)},
+		{6.0, MustNew(6.0)},
+		{6.6, MustNew(6.6)},
+		{float32(6.6), MustNew(float32(6.6))},
+		{int64(922336854775807), MustNew(922336854775807)},
+		{int64(9223372036854775807), MustNew(9223372036854775807)},
+		{"98292223372036854775807", MustNew("98292223372036854775807")},
+		{"6", MustNew("6")},
+		{"6.6", MustNew("6.6")},
+		{"abc", MustNew("abc")},
+		{true, MustNew(true)},
+		{false, MustNew(false)},
+		{anError, MustNew(anError)},
+	}
+
+	for _, c := range cases {
+		got, err := New(c.in)
+		if err != nil {
+			t.Errorf("New(%v) err: %v", c.in, err)
+		}
+
+		if err := checkLitsMatch(got, c.want); err != nil {
+			t.Errorf("New(%v): %s", c.in, err)
+		}
+	}
+}
+
+func TestNew_errors(t *testing.T) {
 	cases := []struct {
 		in        interface{}
 		want      *Literal
 		wantError error
 	}{
-		{6, MustNew(6), nil},
-		{6.0, MustNew(6.0), nil},
-		{6.6, MustNew(6.6), nil},
-		{float32(6.6), MustNew(float32(6.6)), nil},
-		{int64(922336854775807), MustNew(922336854775807), nil},
-		{int64(9223372036854775807), MustNew(9223372036854775807), nil},
-		{"98292223372036854775807", MustNew("98292223372036854775807"), nil},
 		{complex64(1), MustNew(InvalidKindError("complex64")),
 			InvalidKindError("complex64")},
 		{complex128(1), MustNew(InvalidKindError("complex128")),
 			InvalidKindError("complex128")},
-		{"6", MustNew("6"), nil},
-		{"6.6", MustNew("6.6"), nil},
-		{"abc", MustNew("abc"), nil},
-		{true, MustNew(true), nil},
-		{false, MustNew(false), nil},
-		{errors.New("This is an error"), MustNew(errors.New("This is an error")),
-			nil},
 	}
 
 	for _, c := range cases {
@@ -39,8 +58,8 @@ func TestNew(t *testing.T) {
 			t.Errorf("New(%v) - err == %v, wantError == %v", c.in, err, c.wantError)
 		}
 
-		if got.String() != c.want.String() {
-			t.Errorf("New(%v) - got == %s, want == %s", c.in, got, c.want)
+		if err := checkLitsMatch(got, c.want); err != nil {
+			t.Errorf("New(%v): %s", c.in, err)
 		}
 	}
 }
@@ -58,13 +77,14 @@ func TestNewString(t *testing.T) {
 
 	for _, c := range cases {
 		got := NewString(c.in)
-		if got.String() != c.want.String() {
-			t.Errorf("New(%v) - got == %s, want == %s", c.in, got, c.want)
+		if err := checkLitsMatch(got, c.want); err != nil {
+			t.Errorf("NewString(%v): %s", c.in, err)
 		}
 	}
 }
 
 func TestMustNew(t *testing.T) {
+	anError := errors.New("this is an error")
 	cases := []struct {
 		in   interface{}
 		want *Literal
@@ -81,13 +101,13 @@ func TestMustNew(t *testing.T) {
 		{"abc", MustNew("abc")},
 		{true, MustNew(true)},
 		{false, MustNew(false)},
-		{errors.New("This is an error"), MustNew(errors.New("This is an error"))},
+		{anError, MustNew(anError)},
 	}
 
 	for _, c := range cases {
 		got := MustNew(c.in)
-		if got.String() != c.want.String() {
-			t.Errorf("MustNew(%v) - got: %s, want: %s", c.in, got, c.want)
+		if err := checkLitsMatch(got, c.want); err != nil {
+			t.Errorf("MustNew(%v): %s", c.in, err)
 		}
 	}
 }
@@ -282,6 +302,35 @@ func TestErr(t *testing.T) {
 	}
 }
 
+func checkLitsMatch(got, want *Literal) error {
+	if got.String() != want.String() {
+		return fmt.Errorf("got.String(): %s, want.String(): %s", got, want)
+	}
+
+	if got.Err() != want.Err() {
+		return fmt.Errorf("got.Err(): %s, want.Err(): %s", got.Err(), want.Err())
+	}
+
+	canBeIntGot, intGot := got.Int()
+	canBeIntWant, intWant := want.Int()
+	if canBeIntGot != canBeIntWant || intGot != intWant {
+		return fmt.Errorf("Int statuses do not match")
+	}
+
+	canBeFloatGot, intGot := got.Float()
+	canBeFloatWant, intWant := want.Float()
+	if canBeFloatGot != canBeFloatWant || intGot != intWant {
+		return fmt.Errorf("Float statuses do not match")
+	}
+
+	canBeBoolGot, intGot := got.Bool()
+	canBeBoolWant, intWant := want.Bool()
+	if canBeBoolGot != canBeBoolWant || intGot != intWant {
+		return fmt.Errorf("Bool statuses do not match")
+	}
+	return nil
+}
+
 /*************************
        Benchmarks
 *************************/
@@ -296,6 +345,36 @@ func BenchmarkInt_unknown(b *testing.B) {
 		if !ok {
 			b.Errorf("Int - ok: %t, want: %t", ok, true)
 		}
+		sum += v
+	}
+	if sum != int64(7*b.N) {
+		b.Errorf("sum: %d, want: %d", sum, 7*b.N)
+	}
+}
+
+func BenchmarkNewInt(b *testing.B) {
+	b.StopTimer()
+	var sum int64
+	for n := 0; n < b.N; n++ {
+		b.StartTimer()
+		l, _ := New(7)
+		b.StopTimer()
+		v, _ := l.Int()
+		sum += v
+	}
+	if sum != int64(7*b.N) {
+		b.Errorf("sum: %d, want: %d", sum, 7*b.N)
+	}
+}
+
+func BenchmarkNewString(b *testing.B) {
+	b.StopTimer()
+	var sum int64
+	for n := 0; n < b.N; n++ {
+		b.StartTimer()
+		l, _ := New("7.0")
+		b.StopTimer()
+		v, _ := l.Int()
 		sum += v
 	}
 	if sum != int64(7*b.N) {
