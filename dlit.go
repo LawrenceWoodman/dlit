@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync"
 )
 
 // Literal represents a dynamically typed value
@@ -26,6 +27,7 @@ type Literal struct {
 	canBeFloat canBeKind
 	canBeBool  canBeKind
 	canBeError canBeKind
+	sync.Mutex
 }
 
 type canBeKind int
@@ -75,11 +77,16 @@ func MustNew(v interface{}) *Literal {
 
 // Int returns Literal as an int64 and whether it can be an int64
 func (l *Literal) Int() (value int64, canBeInt bool) {
+	l.Lock()
+	defer l.Unlock()
 	switch l.canBeInt {
 	case yes:
 		return l.i, true
 	case unknown:
-		if v, ok := parseInt(l.String()); ok {
+		l.Unlock()
+		s := l.String()
+		l.Lock()
+		if v, ok := parseInt(s); ok {
 			l.canBeInt = yes
 			l.i = v
 			return v, true
@@ -113,11 +120,16 @@ func parseInt(s string) (value int64, ok bool) {
 
 // Float returns Literal as a float64 and whether it can be a float64
 func (l *Literal) Float() (value float64, canBeFloat bool) {
+	l.Lock()
+	defer l.Unlock()
 	switch l.canBeFloat {
 	case yes:
 		return l.f, true
 	case unknown:
-		f, err := strconv.ParseFloat(l.String(), 64)
+		l.Unlock()
+		s := l.String()
+		l.Lock()
+		f, err := strconv.ParseFloat(s, 64)
 		if err == nil {
 			l.canBeFloat = yes
 			l.f = f
@@ -130,6 +142,8 @@ func (l *Literal) Float() (value float64, canBeFloat bool) {
 
 // Bool returns Literal as a bool and whether it can be a bool
 func (l *Literal) Bool() (value bool, canBeBool bool) {
+	l.Lock()
+	defer l.Unlock()
 	switch l.canBeBool {
 	case yes:
 		return l.b, true
@@ -169,6 +183,8 @@ func (l *Literal) Bool() (value bool, canBeBool bool) {
 
 // String returns Literal as a string
 func (l *Literal) String() string {
+	l.Lock()
+	defer l.Unlock()
 	if len(l.s) > 0 {
 		return l.s
 	}
@@ -191,6 +207,8 @@ func (l *Literal) String() string {
 
 // Err returns an error if can be an error or nil
 func (l *Literal) Err() error {
+	l.Lock()
+	defer l.Unlock()
 	if l.canBeError == yes {
 		return l.e
 	}
