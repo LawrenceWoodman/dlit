@@ -366,7 +366,7 @@ func BenchmarkFloat_unknown(b *testing.B) {
 		sum += v
 	}
 	if sum != float64(7.0*b.N) {
-		b.Errorf("sum: %d, want: %d", sum, 7.0*b.N)
+		b.Errorf("sum: %f, want: %f", sum, float64(7.0*b.N))
 	}
 }
 
