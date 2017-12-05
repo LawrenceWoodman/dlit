@@ -352,6 +352,24 @@ func BenchmarkInt_unknown(b *testing.B) {
 	}
 }
 
+func BenchmarkFloat_unknown(b *testing.B) {
+	b.StopTimer()
+	var sum float64
+	for n := 0; n < b.N; n++ {
+		l := MustNew("7.0")
+		b.StartTimer()
+		v, ok := l.Float()
+		b.StopTimer()
+		if !ok {
+			b.Errorf("Float - ok: %t, want: %t", ok, true)
+		}
+		sum += v
+	}
+	if sum != float64(7.0*b.N) {
+		b.Errorf("sum: %d, want: %d", sum, 7.0*b.N)
+	}
+}
+
 func BenchmarkNewInt(b *testing.B) {
 	b.StopTimer()
 	var sum int64
