@@ -21,7 +21,7 @@ type Literal struct {
 	i          int64
 	f          atomic.Value
 	s          atomic.Value
-	b          atomic.Value
+	b          int32
 	e          atomic.Value
 	canBeInt   int32
 	canBeFloat int32
@@ -60,7 +60,7 @@ func New(v interface{}) (*Literal, error) {
 	case string:
 		s = e
 	case bool:
-		l.b.Store(e)
+		l.setBool(e)
 		l.canBeBool = int32(yes)
 	case error:
 		l.e.Store(e)
@@ -164,36 +164,36 @@ func (l *Literal) Float() (value float64, canBeFloat bool) {
 func (l *Literal) Bool() (value bool, canBeBool bool) {
 	switch loadCanBeKind(&l.canBeBool) {
 	case yes:
-		return l.b.Load().(bool), true
+		return l.getBool(), true
 	case no:
 		return false, false
 	case unknown:
 		if l.isInt() {
 			v := atomic.LoadInt64(&l.i)
 			if v == 0 {
-				l.b.Store(false)
+				l.setBool(false)
 				storeCanBeKind(&l.canBeBool, yes)
 				return false, true
 			} else if v == 1 {
-				l.b.Store(true)
+				l.setBool(true)
 				storeCanBeKind(&l.canBeBool, yes)
 				return true, true
 			}
 		} else if l.isFloat() {
 			v := l.f.Load().(float64)
 			if v == 0.0 {
-				l.b.Store(false)
+				l.setBool(false)
 				storeCanBeKind(&l.canBeBool, yes)
 				return false, true
 			} else if v == 1.0 {
-				l.b.Store(true)
+				l.setBool(true)
 				storeCanBeKind(&l.canBeBool, yes)
 				return true, true
 			}
 		} else {
 			b, err := strconv.ParseBool(l.String())
 			if err == nil {
-				l.b.Store(b)
+				l.setBool(b)
 				storeCanBeKind(&l.canBeBool, yes)
 				return b, true
 			}
@@ -215,7 +215,7 @@ func (l *Literal) String() string {
 	case l.isFloat():
 		s = strconv.FormatFloat(l.f.Load().(float64), 'f', -1, 64)
 	case l.isBool():
-		if l.b.Load().(bool) {
+		if l.getBool() {
 			s = "true"
 		} else {
 			s = "false"
@@ -251,7 +251,24 @@ func (l *Literal) isError() bool {
 	return loadCanBeKind(&l.canBeError) == yes
 }
 
-// loadCanBeKind gets the value of x, using an atomic operation
+// setBool sets l.b to b using an atomic operation
+func (l *Literal) setBool(b bool) {
+	if b {
+		atomic.StoreInt32(&l.b, 1)
+	} else {
+		atomic.StoreInt32(&l.b, 0)
+	}
+}
+
+// getBool returns l.b using an atomic operation
+func (l *Literal) getBool() bool {
+	if atomic.LoadInt32(&l.b) == 1 {
+		return true
+	}
+	return false
+}
+
+// loadCanBeKind gets the value of x using an atomic operation
 func loadCanBeKind(x *int32) canBeKind {
 	return canBeKind(atomic.LoadInt32(x))
 }

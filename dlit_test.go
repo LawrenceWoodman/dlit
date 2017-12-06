@@ -369,6 +369,47 @@ func BenchmarkFloat_unknown(b *testing.B) {
 		b.Errorf("sum: %f, want: %f", sum, float64(7.0*b.N))
 	}
 }
+func BenchmarkBool_unknown(b *testing.B) {
+	b.StopTimer()
+	var countTrue int
+	for n := 0; n < b.N; n++ {
+		l := MustNew("true")
+		b.StartTimer()
+		v, ok := l.Bool()
+		b.StopTimer()
+		if !ok {
+			b.Errorf("Bool - ok: %t, want: %t", ok, true)
+		}
+		if v {
+			countTrue++
+		}
+	}
+	if countTrue != b.N {
+		b.Errorf("countTrue: %d, want: %d", countTrue, b.N)
+	}
+}
+
+func BenchmarkBool_multiple(b *testing.B) {
+	b.StopTimer()
+	var countTrue int
+	for n := 0; n < b.N; n++ {
+		lits := []*Literal{MustNew(true), MustNew(1), MustNew(1.0), MustNew("1")}
+		for _, l := range lits {
+			b.StartTimer()
+			v, ok := l.Bool()
+			b.StopTimer()
+			if !ok {
+				b.Errorf("Bool - ok: %t, want: %t", ok, true)
+			}
+			if v {
+				countTrue++
+			}
+		}
+	}
+	if countTrue != 4*b.N {
+		b.Errorf("countTrue: %d, want: %d", countTrue, 4*b.N)
+	}
+}
 
 func BenchmarkNewInt(b *testing.B) {
 	b.StopTimer()
